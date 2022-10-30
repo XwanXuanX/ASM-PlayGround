@@ -31,7 +31,7 @@ cont:
 	push r10
 	mov r10, mc
 	sub r10, [rsp]	; r10 = mc - r10 * 2
-	add rsp, 16
+	add rsp, 8
 star:
 	mov byte[rdx], '*'
 	inc rdx
