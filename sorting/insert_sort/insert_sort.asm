@@ -7,51 +7,86 @@
 	section .data
 Arr	db 2, 4, 3, 6, 1, 7, 4, 6
 Arr_len	equ $ - Arr
-Zero	equ 0x30
 
 	section .bss
 output	resb 30
 out_len	equ 30
 
 	section .text
-_start:
-	mov rdx, Arr
-	; insertion sort begin
-	mov r8, 1	; int i = 1 (Arr[0] is already sorted)
+Insert_Sort:
+	; function prologue
+	push rbx
+	push rbp
+	push r12
+	push r13
+	; function body
+	mov rbx, 1	; int i = 1 (no elements before Arr[0])
 i_LP1:
-	cmp r8, Arr_len
-	je cont
-	mov al, byte[rdx + r8]	; al = key
-	lea r9, [r8 - 1]	; int j = i - 1
+	cmp rbx, rsi
+	je i_epilogue
+	mov r12b, byte[rdi + rbx]	; r12b = key
+	lea rbp, [rbx - 1]
 i_LP2:
-	cmp r9, 0
+	cmp rbp, 0
 	jl i_LP2_end
-	mov r10b, byte[rdx + r9]	; Arr[j]
-	cmp r10b, al
+	mov r13b, byte[rdi + rbp]
+	cmp r13b, r12b
 	jng i_LP2_end
-	mov byte[rdx + r9 + 1], r10b	; Arr[j + 1] = Arr[j]
-	dec r9
+	mov byte[rdi + rbp + 1], r13b
+	dec rbp
 	jmp i_LP2
 i_LP2_end:
-	mov byte[rdx + r9 + 1], al
-	inc r8
+	mov byte[rdi + rbp + 1], r12b
+	inc rbx
 	jmp i_LP1
-cont:
-	xor r8, r8
-	mov rdi, output
-o_LP:
-	cmp r8, Arr_len
-	je print
-	mov r9b, byte[rdx + r8]
-	add r9, Zero
-	mov byte[rdi], r9b
-	inc rdi
-	mov byte[rdi], 32
-	inc rdi
-	inc r8
-	jmp o_LP
-print:
-	mov byte[rdi], 10
+i_epilogue:
+	; function epilogue
+	pop r13
+	pop r12
+	pop rbp
+	pop rbx
+	ret
+
+Print:
+	; function prologue
+	push rbx	; counter
+	push r12	; tmp var
+	push rbp	; output pointer
+	; function body
+	mov rbp, rdx
+	xor rbx, rbx	; int i = 0
+p_LP:
+	cmp rbx, rsi
+	je p_epilogue
+	mov r12b, byte[rdi + rbx]
+	add r12, 0x30	; add zero
+	mov byte[rbp], r12b
+	inc rbp
+	mov byte[rbp], 32
+	inc rbp
+	inc rbx
+	jmp p_LP
+p_epilogue:
+	mov byte[rbp], 10
+	; function epilogue
+	pop rbp
+	pop r12
+	pop rbx
+	ret
+
+_start:
+	; Insert_Sort function takes two parameters
+	mov rdi, Arr		; the pointer to the first element in Arr
+	mov rsi, Arr_len	; the length of the array
+	call Insert_Sort
+
+	; Print function takes three parameters
+	mov rdi, Arr		; the pointer to the arr first element
+	mov rsi, Arr_len	; the length of the array
+	mov rdx, output		; the pointer to the output first element
+	call Print
+
+	; invoke syscall
 	mov rax, 1
 	mov rdi, rax
 	mov rsi, output
