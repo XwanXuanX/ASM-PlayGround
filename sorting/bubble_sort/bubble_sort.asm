@@ -7,54 +7,87 @@
 	section .data
 Arr	db 2, 1, 4, 3, 6, 4, 8
 Arr_len	equ $ - Arr
-Zero	equ 0x30
 
 	section .bss
 output	resb 20
 out_len	equ 20
 
 	section .text
-_start:
-	mov rdx, Arr
-	; Bubble sort algorithm
-	mov r8, (Arr_len - 2)	; int i = sizeof(Arr) / sizeof(byte) - 2
+Bubble_Sort: ; Bubble_Sort(char* p_Arr, unsigned int size)
+	; function prologue
+	push rbx
+	push rbp
+	push r12
+	; function body
+	lea rbx, [rsi - 2]	; int i = Arr_len - 2
 b_LP1:
-	cmp r8, 0
-	jl cont1
-	xor r9, r9	; int j = 0
+	cmp rbx, 0
+	jl b_epilogue
+	xor rbp, rbp	; int j = 0
 b_LP2:
-	cmp r9, r8
+	cmp rbp, rbx
 	jg b_LP2_end
-	mov r10b, [rdx + r9]		; arr[j]
-	cmp r10b, byte[rdx + r9 + 1]	; arr[j + 1]
+	mov r12b, byte[rdi + rbp]
+	cmp r12b, byte[rdi + rbp + 1]
 	jng b_cont
-	push r10
-	mov r10b, byte[rdx + r9 + 1]
-	mov byte[rdx + r9], r10b	; arr[j] = arr[j + 1]
-	pop r10
-	mov byte[rdx + r9 + 1], r10b	; arr[j + 1] = arr[j]
+	push r12
+	mov r12b, byte[rdi + rbp + 1]
+	mov byte[rdi + rbp], r12b
+	pop r12
+	mov byte[rdi + rbp + 1], r12b
 b_cont:
-	inc r9
+	inc rbp
 	jmp b_LP2
 b_LP2_end:
-	dec r8
+	dec rbx
 	jmp b_LP1
-cont1:
-	xor r8, r8		; i = 0
-	mov rdi, output
-o_LP:
-	cmp r8, Arr_len
-	je print
-	mov r9b, byte[rdx + r8]
-	add r9, Zero
-	mov byte[rdi], r9b
-	inc rdi
-	mov byte[rdi], 32
-	inc rdi
-	inc r8
-	jmp o_LP
-print:
-	mov byte[rdi], 10
+	; function epilogue
+b_epilogue:
+	pop r12
+	pop rbp
+	pop rbx
+	ret
+
+Print:
+	; function prologue
+	push rbx	; counter
+	push r12	; tmp var
+	push rbp	; output pointer
+	; function body
+	mov rbp, rdx
+	xor rbx, rbx	; int i = 0
+p_LP:
+	cmp rbx, rsi
+	je p_epilogue
+	mov r12b, byte[rdi + rbx]
+	add r12, 0x30	; add zero
+	mov byte[rbp], r12b
+	inc rbp
+	mov byte[rbp], 32
+	inc rbp
+	inc rbx
+	jmp p_LP
+p_epilogue:
+	mov byte[rbp], 10
+	; function epilogue
+	pop rbp
+	pop r12
+	pop rbx
+	ret
+
+_start:
+	; BUbble sort function takes two parameters
+	mov rdi, Arr		; the pointer to the arr first element
+	mov rsi, Arr_len	; the length of the array
+	call Bubble_Sort
+
+	; Print function takes three parameters
+	mov rdi, Arr		; the pointer to the arr first element
+	mov rsi, Arr_len	; the length of the array
+	mov rdx, output		; the pointer to the output first element
+	call Print
+
+	; invoke syscall
 	mov rax, 1
 	mov rdi, rax
 	mov rsi, output
