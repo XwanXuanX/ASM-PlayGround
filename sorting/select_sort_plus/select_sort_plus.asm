@@ -26,7 +26,7 @@ Select_Sort_Plus:
 	lea rbp, [rsi - 1]	; iright = n - 1
 s_LP1:
 	cmp rbx, rbp	; while (ileft < iright)
-	je s_epilogue
+	jnl s_epilogue
 	mov r12, rbx	; min = ileft
 	mov r13, rbx	; max = ileft
 	mov r14, rbx	; tmp = ileft
@@ -118,6 +118,7 @@ _start:
 	mov rdi, Arr		; the pointer to the arr first element
 	mov rsi, Arr_len	; the length of the array
 	mov rdx, output		; the pointer to the output first element
+	call Print
 
 	; invoke syscall
 	mov rax, 1
